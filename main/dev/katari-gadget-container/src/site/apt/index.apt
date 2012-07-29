@@ -1,0 +1,136 @@
+~~~ vim: set sw=1 et ts=1 ai:
+
+The gadget container
+
+ This module provides an open social compliant gadget container.
+
+Using this module
+
+ To include this module in a Katari based application, put in your application
+ context file (usually src/main/webapp/WEB-INF/applicationContext.xml), a line
+ of the form:
+
+-----
+<katari:import module="com.globant.katari.shindig"/>
+-----
+
+ Shindig needs to know where the application is running, so you need to
+ configure the host name, port number, and context path. Override
+ shindig.hostAndPort and shindig.contextPath:
+
+-----
+<bean id='shindig.hostAndPort'
+  class='com.globant.katari.core.spring.StringHolder'
+  p:value='localhost:8088' />
+
+<bean id='shindig.contextPath'
+  class='com.globant.katari.core.spring.StringHolder'
+  p:value='/sample-web' />
+-----
+
+ This makes the gadget container available for your application. You can make
+ it available in any page you want. But first, you must make some gadgets
+ available to show in it. In this version you must manually insert the gadgets
+ into the applications table:
+
+-----
+insert into applications (id, title, url) values (2, 'Activities',
+ 'http://localhost:8098/katari-sample/module/gadget/ActivityTest.xml');
+-----
+
+ This makes the activities gadget available in the application directory, a
+ page where you can select gadgets and include them in your page.
+
+ To include the gadget container in your page, include this in it:
+
+-----
+ <div id='custom-gadgets'>
+   <div class='gadgetContainerTools'>
+     <a href='${baseweb}/module/gadgetcontainer/directory.do \
+     ?returnUrl=/module/institutional/dashboard.do&amp;gadgetGroupName=main'>
+     Add ...</a>
+   </div>
+   <!-- will hold open social gadgets. -->
+ </div>
+ <script type='text/javascript'>
+
+   $(document).ready(function() {
+     katari.social.renderGadgetGroup('custom-gadgets', 'main');
+   });
+ </script>
+-----
+
+ As you can see, you need to create an html container (custom-gadgets in this
+ case) to hold the gadgets. Then you initialize a GadgetGroup object with data
+ coming from gadgetcontainer/getGadgetGroup.do.
+
+ The full signature of the renderGadgetGroup function is:
+
+-----
+ katari.social.renderGadgetGroup = function(container, groupName, ownerId);
+-----
+
+ The ownerId is the owner of the gadget group you want to render. If not
+ specified, it uses the gadget group owner by the viewer.
+
+ This example also adds a button to the gadget directory
+ (gadgetcontainer/directory.do) to add new elements to the page.
+
+Design
+
+* Domain model
+
+ The gadget container organizes gadgets in 'gadget groups', that contains a
+ collection of 'gadget instances'. Each gadget instance has a reference to an
+ application, basically the url for the gadget xml specification, and the views
+ the application supports.
+
+ You can display gadget groups in a page.
+
+ There are three types of gadget groups:  shared (the same
+ gadget group is seen by all users), non shared (each user has his own group)
+ or template.
+
+ Non shared gadget groups can be configured by the user, adding, moving or
+ removing gadgets from the group.
+
+ Non-shared gadget groups can be created on demand: if a user tries to access a
+ non existing non-shared gadget group, then katari creates one for him, from a
+ gadget group template with the same name.
+
+ Each gadget group has a view. A gadget group can contain only applications
+ with the default view, or applications that support the gadget group's view.
+
+[images/gadget-container-domain.png]
+
+* Entities responsibilities
+
+ [Application] This comes form the shindig module. It knows everything that is
+ needed to render a gadget in the browser. An application has a list of
+ supported views.
+
+ [GadgetGroup] The central concept in the gadget container, a gadget group is a
+ collection of applications positioned on the page. It defines a view, and can
+ only contain applications that support the gadget group's view, or the default
+ view.
+
+ [GadgetInstance] An element that holds the position of a gadget in the gadget
+ group.
+
+ [GadgetGroupRepository] The entry point to find gadget groups.
+
+Configuration
+
+ If debugMode.value is set to true in the configuration property file, then the
+ container does not cache the gadget xml spec and does not compress the social
+ javascript files. This makes it easier to debug the javascript files and
+ hot redeploy the gadgets.
+
+ You can also allow users to see other people's gadgets. You must implement the
+ interface ViewerOwnerRestriction and declare it in you application context as:
+
+-----
+  <bean id="gadgetcontainer.viewOwnerRestriction"
+    class="com.globant.gadgets.MyViewerOwnerRestriction" />
+-----
+

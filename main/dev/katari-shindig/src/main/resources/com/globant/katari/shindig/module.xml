@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:p="http://www.springframework.org/schema/p"
+      xmlns:util="http://www.springframework.org/schema/util"
+      xmlns:katari="http://www.globant.com/schema/katari"
+      xmlns:camel="http://camel.apache.org/schema/spring"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-2.0.xsd
+      http://www.globant.com/schema/katari
+      http://www.globant.com/schema/katari/katari.xsd
+      http://camel.apache.org/schema/spring
+      http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  <bean id="shindig.module" class="com.globant.katari.core.web.ConfigurableModule">
+
+    <!-- Initializes Guice when the web application context starts. -->
+    <property name='listeners'>
+      <list>
+        <bean class='com.globant.katari.shindig.GuiceInitializerListener'>
+          <constructor-arg>
+            <list>
+              <bean class='com.globant.katari.shindig.ShindigPropertiesModule'>
+                <constructor-arg ref='shindig.contextPath'/>
+              </bean>
+              <bean class='org.apache.shindig.gadgets.DefaultGuiceModule'/>
+              <!-- value>org.apache.shindig.social.sample.SampleModule</value -->
+              <bean class='com.globant.katari.shindig.ShindigServicesModule'>
+                <constructor-arg ref='shindig.activityService'/>
+                <constructor-arg ref='shindig.personService'/>
+                <constructor-arg ref='shindig.blobCrypterDecoder'/>
+                <constructor-arg ref='shindig.tokenCrypter'/>
+                <constructor-arg ref='shindig.hostAndPort'/>
+                <constructor-arg ref='shindig.contextPath'/>
+              </bean>
+              <bean class='org.apache.shindig.gadgets.oauth.OAuthModule'/>
+              <bean class='org.apache.shindig.common.cache.ehcache.EhCacheModule'/>
+            </list>
+          </constructor-arg>
+        </bean>
+      </list>
+    </property>
+
+    <!-- Filters as defined by shindig. -->
+    <property name='filters'>
+      <bean class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+          <list>
+            <bean class="com.globant.katari.core.web.FilterMapping">
+              <constructor-arg value='/module/shindig/social.*'/>
+              <constructor-arg>
+                <bean class="com.globant.katari.core.web.FilterAndParameters">
+                  <constructor-arg>
+                    <ref bean='shindig.authenticationFilter'/>
+                  </constructor-arg>
+                </bean>
+              </constructor-arg>
+            </bean>
+            <bean class="com.globant.katari.core.web.FilterMapping">
+              <constructor-arg value='/module/shindig/gadgets/ifr.*'/>
+              <constructor-arg>
+                <bean class="com.globant.katari.core.web.FilterAndParameters">
+                  <constructor-arg>
+                    <ref bean='shindig.authenticationFilter'/>
+                  </constructor-arg>
+                </bean>
+              </constructor-arg>
+            </bean>
+            <bean class="com.globant.katari.core.web.FilterMapping">
+              <constructor-arg value='/module/shindig/gadgets/makeRequest.*'/>
+              <constructor-arg>
+                <bean class="com.globant.katari.core.web.FilterAndParameters">
+                  <constructor-arg>
+                    <ref bean='shindig.authenticationFilter'/>
+                  </constructor-arg>
+                </bean>
+              </constructor-arg>
+            </bean>
+            <bean class="com.globant.katari.core.web.FilterMapping">
+              <constructor-arg value='/module/shindig/gadgets/api/rpc.*'/>
+              <constructor-arg>
+                <bean class="com.globant.katari.core.web.FilterAndParameters">
+                  <constructor-arg>
+                    <ref bean='shindig.authenticationFilter'/>
+                  </constructor-arg>
+                </bean>
+              </constructor-arg>
+            </bean>
+            <bean class="com.globant.katari.core.web.FilterMapping">
+              <constructor-arg value='/module/shindig/gadgets/api/rest.*'/>
+              <constructor-arg>
+                <bean class="com.globant.katari.core.web.FilterAndParameters">
+                  <constructor-arg>
+                    <ref bean='shindig.authenticationFilter'/>
+                  </constructor-arg>
+                </bean>
+              </constructor-arg>
+            </bean>
+          </list>
+        </property>
+      </bean>
+    </property>
+
+    <!-- Servlets as defined by shindig. -->
+    <property name="entryPoints">
+      <bean class="org.springframework.beans.factory.config.MapFactoryBean">
+        <property name="sourceMap">
+          <map>
+            <entry key="/gadgets/js">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.gadgets.servlet.JsServlet" />
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/proxy">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.gadgets.servlet.ProxyServlet" />
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/makeRequest">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.gadgets.servlet.MakeRequestServlet" />
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/api/rpc">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.protocol.JsonRpcServlet" />
+                </constructor-arg>
+                <constructor-arg index="1">
+                  <map>
+                    <entry key="handlers">
+                      <value>org.apache.shindig.handlers</value>
+                    </entry>
+                  </map>
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/api/rest">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.protocol.DataServiceServlet" />
+                </constructor-arg>
+                <constructor-arg index="1">
+                  <map>
+                    <entry key="handlers">
+                      <value>org.apache.shindig.handlers</value>
+                    </entry>
+                  </map>
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/concat">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean
+                    class="org.apache.shindig.gadgets.servlet.ConcatProxyServlet"
+                    />
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/oauthcallback">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean
+                    class="org.apache.shindig.gadgets.servlet.OAuthCallbackServlet"
+                    />
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/ifr">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean
+                    class="org.apache.shindig.gadgets.servlet.GadgetRenderingServlet"
+                    />
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/accel">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean
+                    class="org.apache.shindig.gadgets.servlet.HtmlAccelServlet"
+                    />
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/gadgets/metadata">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.gadgets.servlet.RpcServlet" />
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/social/rest">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.protocol.DataServiceServlet" />
+                </constructor-arg>
+                <constructor-arg index="1">
+                  <map>
+                    <entry key="handlers">
+                      <value>org.apache.shindig.social.handlers</value>
+                    </entry>
+                  </map>
+                </constructor-arg>
+              </bean>
+            </entry>
+            <entry key="/social/rpc">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.protocol.JsonRpcServlet" />
+                </constructor-arg>
+                <constructor-arg index="1">
+                  <map>
+                    <entry key="handlers">
+                      <value>org.apache.shindig.social.handlers</value>
+                    </entry>
+                  </map>
+                </constructor-arg>
+              </bean>
+            </entry>
+            <!--entry key="/oauth">
+              <bean class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="org.apache.shindig.gadgets.servlet.ProxyServlet" />
+                </constructor-arg>
+              </bean>
+            </entry -->
+          </map>
+        </property>
+      </bean>
+    </property>
+
+    <property name="urlToRoleMapper">
+      <bean class="com.globant.katari.core.security.StaticUrlToRoleMapper">
+        <constructor-arg index="0">
+          <map>
+            <entry key="/**">
+              <list>
+                <value>IS_AUTHENTICATED_ANONYMOUSLY</value>
+              </list>
+            </entry>
+          </map>
+        </constructor-arg>
+      </bean>
+    </property>
+
+  </bean>
+
+  <bean id='shindig.authenticationFilter'
+    class="org.apache.shindig.auth.AuthenticationServletFilter" />
+
+  <bean class='com.globant.katari.core.web.ListFactoryAppender'>
+    <constructor-arg value='katari.persistentClasses'/>
+    <constructor-arg>
+      <list>
+        <value>com.globant.katari.shindig.domain.Application</value>
+        <value>com.globant.katari.shindig.domain.KatariActivity</value>
+        <value>com.globant.katari.shindig.domain.KatariMediaItem</value>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <!-- We cannot guarantee that gadgets generate well formed html, so we don't
+       let katari validate them. -->
+  <bean class='com.globant.katari.core.web.ListFactoryAppender'>
+    <constructor-arg value='katari.htmlValidator.ignoredUrlpatterns' />
+    <constructor-arg>
+      <list>
+        <value>.*/module/shindig/gadgets/ifr.*</value>
+        <value>.*/module/shindig/gadgets/proxy.*</value>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <bean id='shindig.personService'
+    class='com.globant.katari.shindig.application.KatariPersonService'>
+    <property name='sessionFactory'>
+      <ref bean='katari.sessionFactory' />
+    </property>
+  </bean>
+
+  <bean id='shindig.activityService'
+    class='com.globant.katari.shindig.application.KatariActivityService'>
+    <constructor-arg index='0' ref='shindig.applicationRepository'/>
+    <property name='sessionFactory'>
+      <ref bean='katari.sessionFactory' />
+    </property>
+    <property name="newsFeedApplicationId" ref="shindig.newsFeedApplicationId" />
+    <property name="katariActivityFilter" ref="shindig.katariActivityFilter" />
+  </bean>
+
+  <bean id='shindig.applicationRepository'
+    class='com.globant.katari.shindig.domain.ApplicationRepository'>
+    <property name='sessionFactory'>
+      <ref bean='katari.sessionFactory' />
+    </property>
+  </bean>
+
+  <bean 
+    class='com.globant.katari.core.spring.ConstructorArgumentsBeanNameAutoProxyCreator'>
+    <property name='proxyTargetClass' value='true' />
+    <property name='beanNames'>
+      <list>
+        <value>shindig.activityService</value>
+        <value>shindig.personService</value>
+      </list>
+    </property>
+    <property name='interceptorNames'>
+      <list>
+        <value>shindig.transactionInterceptor</value>
+      </list>
+    </property>
+  </bean>
+
+  <bean id="shindig.transactionInterceptor"
+      class="org.springframework.transaction.interceptor.TransactionInterceptor">
+    <property name="transactionManager" ref="katari.transactionManager" />
+    <property name="transactionAttributes">
+      <props>
+        <prop key="execute">PROPAGATION_REQUIRED</prop>
+      </props>
+    </property>
+  </bean>
+
+  <bean id="shindig.blobCrypterDecoder" 
+    class="org.apache.shindig.auth.KatariBlobCrypterSecurityTokenDecoder">
+    <constructor-arg index="0" ref="shindig.containerName" />
+    <constructor-arg index="1" ref="shindig.tokenCrypter" />
+  </bean>
+
+  <bean id="shindig.tokenCrypter"
+    class="com.globant.katari.shindig.crypto.KatariBasicBlobCrypter">
+    <constructor-arg index="0" ref="shindig.tokenPassword" />  
+  </bean>
+
+  <bean id="shindig.tokenPassword"
+      class="com.globant.katari.core.spring.StringHolder">
+    <property name="value" value="0123456789012618" />
+  </bean>
+
+  <!-- This cannot be changed until we figure out how to configure container.js.
+   -->
+  <bean id="shindig.containerName"
+      class="com.globant.katari.core.spring.StringHolder">
+    <property name="value" value="default" />
+  </bean>
+
+  <!-- This cannot be changed until we figure out how to configure container.js.
+   -->
+  <bean id="shindig.containerDomain"
+      class="com.globant.katari.core.spring.StringHolder">
+    <property name="value" value="shindig" />
+  </bean>
+
+  <bean id="shindig.hostAndPort"
+      class="com.globant.katari.core.spring.StringHolder">
+      <property name="value" value="localhost:8098" />
+  </bean>
+
+  <bean id="shindig.contextPath"
+      class="com.globant.katari.core.spring.StringHolder">
+      <property name="value" value="/katari-sample" />
+  </bean>
+
+  <bean id="shindig.newsFeedApplicationId"
+      class="com.globant.katari.core.spring.StringHolder">
+      <property name="value" value="http://localhost/newsFeed.xml" />
+  </bean>
+
+  <katari:null id="shindig.katariActivityFilter"/>
+
+  <!-- vim: set ts=2 sw=2 et ai: -->  
+</beans>
+

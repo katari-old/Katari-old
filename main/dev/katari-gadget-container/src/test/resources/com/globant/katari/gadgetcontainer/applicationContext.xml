@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:util="http://www.springframework.org/schema/util"
+      xmlns:katari="http://www.globant.com/schema/katari"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-2.0.xsd
+      http://www.globant.com/schema/katari
+      http://www.globant.com/schema/katari/katari.xsd">
+
+  <import resource="classpath:com/globant/katari/core/beans-core.xml"/>
+  <import resource="classpath:com/globant/katari/hibernate/beans-hibernate.xml"/>
+  <import resource="classpath:com/globant/katari/hibernate/coreuser/module.xml"/>
+  <import resource="classpath:com/globant/katari/gadgetcontainer/module.xml"/>
+  <import resource="classpath:com/globant/katari/shindig/module.xml"/>
+  <import resource="classpath:com/globant/katari/gadgetcontainer/view/spring-servlet.xml"/>
+
+  <bean id="dataSource"
+    class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value='org.hsqldb.jdbcDriver'/>
+    <property name="url" value="jdbc:hsqldb:mem:testdb"/>
+    <property name="username" value="sa"/>
+    <property name="password" value=""/>
+  </bean>
+
+  <bean id="katari.hibernateProperties"
+    class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    <property name="properties">
+      <props>
+        <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+        <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
+        <!-- Avoid this, use log4j.logger.org.hibernate.SQL=DEBUG instead
+             prop key="hibernate.show_sql">true</prop -->
+      </props>
+    </property>
+  </bean>
+
+  <alias name="dataSource" alias="katari.dataSource"/>
+
+  <!-- JPA classes -->
+  <bean class='com.globant.katari.core.web.ListFactoryAppender'>
+    <constructor-arg value='katari.persistentClasses' />
+    <constructor-arg>
+      <list>
+        <value>
+          com.globant.katari.gadgetcontainer.domain.SampleUser
+        </value>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <!-- Events raised. -->
+  <!-- Creates the katari.user.deleteUser endpoint. The delete user sends a
+       DeleteMessage to this endpoint just before deleting the user. Listeners
+       of this event must perform all related actions, like removing data owned
+       by the user being deleted. The response for this event must be a goAhead
+       response. -->
+  <bean class='com.globant.katari.core.spring.EventEndpoint'>
+    <constructor-arg ref='user.deleteMessageAggregator'/>
+    <constructor-arg value='direct:katari.user.deleteUser'/>
+    <constructor-arg ref='user.deleteUserListeners'/>
+  </bean>
+
+  <!-- Collapses all the delete messages into one. -->
+  <bean id="user.deleteMessageAggregator"
+    class="com.globant.katari.hibernate.coreuser.DeleteMessageAggregator"/>
+
+  <util:list id='user.deleteUserListeners'/>
+
+</beans>
+
+<!-- vim: set ts=2 et sw=2 ai: -->

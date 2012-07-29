@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.globant.com/schema/katari"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  xmlns:beans="http://www.springframework.org/schema/beans"
+  targetNamespace="http://www.globant.com/schema/katari"
+  elementFormDefault="qualified"
+  attributeFormDefault="unqualified">
+
+  <xsd:import namespace="http://www.springframework.org/schema/beans"/>
+
+  <xsd:element name="menuItem">
+    <xsd:complexType>
+      <xsd:attribute name="name" use="required"/>
+      <xsd:attribute name="display"/>
+      <xsd:attribute name="position" default="1"/>
+      <xsd:attribute name="tooltip"/>
+      <xsd:attribute name="link" use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="menuNode">
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="menuNode"/>
+        <xsd:element ref="menuItem"/>
+      </xsd:choice>
+      <xsd:attribute name="name" use="required"/>
+      <xsd:attribute name="display"/>
+      <xsd:attribute name="position" default="1"/>
+      <xsd:attribute name="tooltip"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="menuBar">
+    <xsd:complexType>
+      <xsd:choice minOccurs="0" maxOccurs="unbounded">
+        <xsd:element ref="menuNode"/>
+        <xsd:element ref="menuItem"/>
+      </xsd:choice>
+      <xsd:attribute name="id" type="xsd:ID"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- Imports a katari module.
+
+  <katari:properties location='classpath:katari.properties'/>
+
+  <katari:import module='com.globant.katari.local-login'/>
+  or
+  <katari:import module='com.globant.katari.local-login'
+    property-name='loginMethod' property-value='local'/>
+  -->
+  <xsd:element name="import">
+    <xsd:complexType>
+      <!-- If there is a property named [property-name] with value
+           [property-value] in the properties entry named [properties-ref],
+           then import the module.
+
+           If no properties-ref is specified, then search all properties.
+
+           If property-name is specified, and property-value is not, then
+           import the module if there is a property with name property-name, no
+           matter the value.
+
+           If neither property-name nor property-value are specified, then
+           import the module no matter what.  -->
+      <xsd:attribute name="properties-ref" use="optional"/>
+      <xsd:attribute name="property-name" use="optional"/>
+      <xsd:attribute name="property-value" use="optional"/>
+      <!-- A classpath package name where to find the module.xml to import. -->
+      <xsd:attribute name="module" use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <!-- Parses a properties file to be used by the import element.
+
+      Element must always appear before the first katari:import.
+      -->
+  <xsd:element name="properties">
+    <xsd:complexType>
+      <!-- The bean name of the properties bean. If not specified, the
+           properties instance is not added to the spring application context.
+           -->
+      <xsd:attribute name="name" use="optional"/>
+      <xsd:attribute name="location" use="required"/>
+    </xsd:complexType>
+  </xsd:element>
+
+  <xsd:element name="null" />
+
+  <!-- vim: set ts=2 et sw=2 : -->
+</xsd:schema>
+

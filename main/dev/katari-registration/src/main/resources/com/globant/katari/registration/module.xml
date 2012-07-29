@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:katari="http://www.globant.com/schema/katari"
+      xmlns:p="http://www.springframework.org/schema/p"
+      xmlns:util="http://www.springframework.org/schema/util"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+      http://www.globant.com/schema/katari
+      http://www.globant.com/schema/katari/katari.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+  <bean id='registration.module'
+      class='com.globant.katari.core.web.ConfigurableModule'>
+
+    <property name='entryPoints'>
+      <bean
+        class="org.springframework.beans.factory.config.MapFactoryBean">
+        <property name="sourceMap">
+          <map>
+            <entry key=".*\.do">
+              <bean
+                class="com.globant.katari.core.web.ServletAndParameters">
+                <constructor-arg index="0">
+                  <bean class="com.globant.katari.core.web.EventFilterDispatcherServlet"/>
+                </constructor-arg>
+                <constructor-arg index="1">
+                  <map>
+                    <entry key="contextConfigLocation">
+                      <value>
+                        classpath:/com/globant/katari/registration/view/spring-servlet.xml
+                      </value>
+                    </entry>
+                  </map>
+                </constructor-arg>
+              </bean>
+            </entry>
+          </map>
+        </property>
+      </bean>
+    </property>
+
+    <property name="urlToRoleMapper">
+      <bean class="com.globant.katari.core.security.StaticUrlToRoleMapper"
+        id='registration.urlToRoleMapper'>
+        <constructor-arg index="0">
+          <map>
+            <entry key='/register.do' value='IS_AUTHENTICATED_ANONYMOUSLY' />
+            <entry key='/forgotPassword.do' value='IS_AUTHENTICATED_ANONYMOUSLY' />
+            <entry key='/resetPassword.do' value='IS_AUTHENTICATED_ANONYMOUSLY' />
+            <entry key='/activateUser.do' value='IS_AUTHENTICATED_ANONYMOUSLY' />
+            <entry key='/resetPasswordResult.do' value='IS_AUTHENTICATED_ANONYMOUSLY' />
+          </map>
+        </constructor-arg>
+      </bean>
+    </property>
+  </bean>
+
+  <!-- We expose the user repository as a public bean. It is used for the
+    security modules. -->
+  <bean id='registration.registrationRepository'
+    class='com.globant.katari.registration.domain.RegistrationRepository'>
+    <property name='sessionFactory'>
+      <ref bean='katari.sessionFactory' />
+    </property>
+  </bean>
+
+  <bean class='com.globant.katari.core.web.ListFactoryAppender'>
+    <constructor-arg value='katari.persistentClasses'/>
+    <constructor-arg>
+      <list>
+        <value>com.globant.katari.registration.domain.RecoverPasswordRequest</value>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <!-- Adds the forgot password link to the login page. -->
+  <bean class='com.globant.katari.core.web.ListFactoryAppender'>
+    <constructor-arg value='local-login.additionalLinks'/>
+    <constructor-arg value='true'/>
+    <constructor-arg>
+      <list>
+        <value>Forgot Password | /module/registration/forgotPassword.do</value>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <!-- Overridable beans -->
+
+  <!-- Forgot password Email Configuration. -->
+
+  <bean name='registration.forgotPasswordEmailFrom' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="katari@globant.com"/>
+
+  <bean name='registration.forgotPasswordEmailSubject' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="Katari Registration Forgot Password"/>
+
+  <bean name='registration.forgotPasswordEmailTemplate' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="com/globant/katari/registration/view/registrationForgotPasswordEmailTemplate.ftl"/>
+
+  <bean name='registration.forgotPasswordEmailPlainText' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="Please copy and paste the following link"/>
+
+  <!-- Reset password Email Configuration. -->
+
+  <bean name='registration.resetPasswordEmailFrom' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="katari@globant.com"/>
+
+  <bean name='registration.resetPasswordEmailSubject' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="Katari Registration Forgot Password"/>
+
+  <bean name='registration.resetPasswordEmailTemplate' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="com/globant/katari/registration/view/registrationResetPasswordEmailTemplate.ftl"/>
+
+  <bean name='registration.resetPasswordEmailPlainText' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="Your password has been reset"/>
+
+  <!-- Reset create user Email Configuration. -->
+
+  <bean name='registration.createUserEmailFrom' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="katari@globant.com"/>
+
+  <bean name='registration.createUserEmailSubject' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="Katari Registration"/>
+
+  <bean name='registration.createUserEmailTemplate' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="com/globant/katari/registration/view/registrationCreateUserEmailTemplate.ftl"/>
+
+  <bean name='registration.createUserEmailPlainText' 
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value="You have succesfully created a new user, please copy and paste the link bellow"/>
+
+</beans>
+<!-- vim: set ts=2 et sw=2 ai : -->

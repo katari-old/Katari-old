@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/util
+    http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+  <!-- freemarker config -->
+  <bean id="freemarkerConfig"
+    class="com.globant.katari.core.web.FreeMarkerConfigurer"
+    p:templateLoaderPath="classpath:/com/globant/katari/login/local/view/"
+    p:debugPrefix='../katari-local-login/src/main/resources'
+    p:debug-ref='debugMode'/>
+
+  <!-- Message source for this context, loaded from localized "messages_xx"
+  files -->
+  <bean id="messageSource"
+    class="com.globant.katari.core.spring.KatariMessageSource"
+    p:basename="classpath:/com/globant/katari/login/local/lang/messages"
+    p:debugPrefix='../katari-local-login/src/main/resources'
+    p:debug-ref='debugMode'>
+    <constructor-arg index='0' value='local-login'/>
+    <constructor-arg index='1' ref='katari.messageSource'/>
+  </bean>
+
+  <bean id="viewResolver"
+    class="com.globant.katari.core.web.FreeMarkerViewResolver"
+    p:prefix="/" p:suffix=".ftl"
+    p:exposeSpringMacroHelpers='true'
+    p:exposeRequestAttributes='true'
+    p:exposeSessionAttributes='true' />
+
+  <!-- The spring mappings. -->
+  <bean name='/login.do'
+    class='com.globant.katari.login.local.view.LoginWithCaptchaController'>
+    <constructor-arg index='0' value='false'/>
+    <constructor-arg index='1' ref='local-login.additionalLinks'/>
+  </bean>
+
+  <bean name='/loginWithCaptcha.do'
+    class='com.globant.katari.login.local.view.LoginWithCaptchaController'>
+    <constructor-arg index='0' value='true'/>
+    <constructor-arg index='1' ref='local-login.additionalLinks'/>
+  </bean>
+
+  <bean name='/logout.do'
+    class='com.globant.katari.login.local.view.LogoutAndRedirectController'/>
+
+  <bean name='/generateCaptcha.do'
+    class='com.globant.katari.login.local.view.CaptchaGeneratorController'>
+    <constructor-arg>
+      <ref bean='local-login.captchaService'/>
+    </constructor-arg>
+  </bean>
+
+  <!-- vim: set ts=2 sw=2 et ai: -->
+</beans>
+

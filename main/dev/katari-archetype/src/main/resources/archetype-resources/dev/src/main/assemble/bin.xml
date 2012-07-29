@@ -1,0 +1,71 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<assembly>
+  <id>bin</id>
+  <formats>
+    <format>zip</format>
+  </formats>
+  <includeBaseDirectory>true</includeBaseDirectory>
+  <fileSets>
+    <fileSet>
+      <outputDirectory>/</outputDirectory>
+      <directory>${artifactId}/target</directory>
+      <includes>
+        <include>user-manual.pdf</include>
+        <include>release-notes.pdf</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <outputDirectory>/</outputDirectory>
+      <directory>${rootArtifactId}-web/target</directory>
+      <includes>
+        <include>${rootArtifactId}-web.war</include>
+        <include>${rootArtifactId}.ddl</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <outputDirectory>/</outputDirectory>
+      <directory>${rootArtifactId}-web/src/main/sql</directory>
+      <includes>
+        <include>db-setup.sql</include>
+      </includes>
+    </fileSet>
+    <fileSet>
+      <outputDirectory>/</outputDirectory>
+      <directory>${rootArtifactId}-web/src/test/resources</directory>
+      <includes>
+        <include>${rootArtifactId}.properties</include>
+        <include>log4j.properties</include>
+      </includes>
+    </fileSet>
+    <!-- The pdf files. -->
+    <fileSet>
+      <outputDirectory>/</outputDirectory>
+      <directory>${artifactId}/target/site/pdf</directory>
+      <includes>
+        <include>user-manual.pdf</include>
+        <include>release-notes.pdf</include>
+      </includes>
+    </fileSet>
+    <!-- The main site. -->
+    <fileSet>
+      <outputDirectory>/doc</outputDirectory>
+      <directory>${artifactId}/target/site</directory>
+      <includes/>
+    </fileSet>
+    <!-- We copy each module. -->
+    <fileSet>
+      <outputDirectory>/doc/${rootArtifactId}-style</outputDirectory>
+      <directory>${rootArtifactId}-style/target/site</directory>
+      <includes/>
+    </fileSet>
+    <fileSet>
+      <outputDirectory>/doc/${rootArtifactId}-web</outputDirectory>
+      <directory>${rootArtifactId}-web/target/site</directory>
+      <includes/>
+    </fileSet>
+  </fileSets>
+</assembly>
+<!-- vim: set ts=2 sw=2 et: -->
+

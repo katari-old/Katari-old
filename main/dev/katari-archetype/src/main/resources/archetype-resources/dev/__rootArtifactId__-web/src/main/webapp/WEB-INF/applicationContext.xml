@@ -1,0 +1,372 @@
+#set( $symbol_pound = '#' )
+#set( $symbol_dollar = '$' )
+#set( $symbol_escape = '\' )
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:p="http://www.springframework.org/schema/p"
+      xmlns:util="http://www.springframework.org/schema/util"
+      xmlns:katari="http://www.globant.com/schema/katari"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-2.0.xsd
+      http://www.globant.com/schema/katari
+      http://www.globant.com/schema/katari/katari.xsd">
+
+  <description>
+    The web application context for the web archetype application.
+  </description>
+
+  <!-- The katari global beans. -->
+  <import resource="classpath:/com/globant/katari/core/applicationContext.xml"/>
+
+  <!-- The monitoring module -->
+  <katari:import module="com.globant.katari.monitoring"/>
+
+  <!-- The home module. -->
+  <katari:import module="${package}.web.home"/>
+
+  <!-- The classic menu module. -->
+  <katari:import module="com.globant.katari.menu.classic"/>
+
+  <!-- The dropdown menu module. -->
+  <katari:import module="com.globant.katari.menu.dropdown"/>
+
+  <!--  The editable-pages module -->
+  <katari:import module="com.globant.katari.editablepages"/>
+
+  <!-- LOGIN. -->
+  <!--
+  To have cas login support you have to enable the cas module.
+  For most of the scenarios the local one should be enough.
+  -->
+  <!-- The cas module. -->
+  <!--
+  <katari:import module="com.globant.katari.cas"/>
+  -->
+
+  <!-- The local login module (recomended) -->
+  <katari:import module="com.globant.katari.login.local"/>
+
+  <!-- The user module. -->
+  <katari:import module="com.globant.katari.user"/>
+
+  <!-- The core user module. -->
+  <katari:import module="com.globant.katari.hibernate.coreuser"/>
+
+  <!-- The reports module. -->
+  <katari:import module="com.globant.katari.report"/>
+
+  <!-- The search module. -->
+  <katari:import module="com.globant.katari.search" />
+
+  <!-- The console module. -->
+  <katari:import module="com.globant.katari.console" />
+
+  <!-- The client libs module. It provides unified access to common javascript
+       apis. -->
+  <katari:import module="com.globant.katari.ajax"/>
+
+  <!-- The shindig module. It integrates shindig open social implementation.
+       -->
+  <katari:import module="com.globant.katari.shindig"/>
+
+  <!-- The gadget container module.  -->
+  <katari:import module="com.globant.katari.gadgetcontainer"/>
+
+  <!--  The quartz module. -->
+  <katari:import module="com.globant.katari.quartz"/>
+
+  <!-- Provides email. -->
+  <katari:import module="com.globant.katari.email" />
+
+  <!-- Provides registration. -->
+  <katari:import module="com.globant.katari.registration" />
+
+  <!-- The style module. It provides a sample style and serves the static
+  content used in the application. -->
+  <katari:import module="${package}.style"/>
+
+  <!-- The Institutional module. It has some static pages. -->
+  <katari:import module="${package}.web.institutional"/>
+
+  <!-- Module to serve static content. -->
+  <katari:import module="com.globant.katari.jsmodule" />
+
+  <!-- The hibernate properties, They are referenced from the hibernate bean.
+       -->
+  <bean id="katari.hibernateProperties"
+    class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    <property name="properties">
+      <props>
+        <prop key="hibernate.dialect">
+          org.hibernate.dialect.MySQL5InnoDBDialect
+        </prop>
+        <!-- Do not put connection information here (eg: hibernate.c3p0.), they
+             will be ignored. -->
+
+        <!-- Maximum number of nested objects fetch in one query. Recommended
+             values between 0 and 3. -->
+        <!-- prop key="hibernate.max_fetch_depth">3</prop -->
+
+        <!-- The size for Hibernate batch fetching of associations. This
+             controls the number of queries that are run when a lazy collection
+             gets initialized. Recommended values 4, 8, 16. -->
+        <prop key="hibernate.default_batch_fetch_size">16</prop>
+
+        <!-- For postgresql.
+        <prop key="hibernate.dialect">
+          org.hibernate.dialect.PostgreSQLDialect
+        </prop>
+        -->
+
+        <!-- WARNING: When this is set to 'auto', which is the default option
+        for Hibernate, it's not possible to change the isolation level of any
+        transaction. Spring sets it to 'on_close', but in this way, the tests
+        never return the connections, thus emptying the connection pool.
+
+        To avoid this, we set it to 'after_transaction', but there may be
+        unexpected side effect we don't know of yet -->
+        <prop key="hibernate.connection.release_mode">after_transaction</prop>
+      </props>
+    </property>
+  </bean>
+
+  <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+    destroy-method="close">
+    <property name="driverClass" value="com.mysql.jdbc.Driver"/>
+    <property name="jdbcUrl" value="jdbc:mysql://localhost/database"/>
+    <property name="user" value="username"/>
+    <property name="password" value="password"/>
+    <property name="minPoolSize" value='5'/>
+    <property name="maxPoolSize" value='5'/>
+
+    <!-- The number of milliseconds a client calling getConnection() will wait
+         for a Connection to be checked-in or acquired when the pool is
+         exhausted. Zero means wait indefinitely. Setting any positive value
+         will cause the getConnection() call to time-out and break with an
+         SQLException after the specified number of milliseconds. -->
+    <property name="checkoutTimeout" value='10000'/>
+
+    <!-- Determines how many connections at a time c3p0 will try to acquire
+         when the pool is exhausted -->
+    <property name="acquireIncrement" value='3'/>
+
+    <!-- The number of seconds between each test of all idle, pooled but
+         unchecked-out connections. Set to 1 minute here. A broken connection
+         will not be kept in the pool for longer than a minute. -->
+    <property name="idleConnectionTestPeriod" value='60'/>
+
+    <!-- Defines the query that will be executed for all connection tests. The
+         following value only works in mysql.
+         For oracle use 'select 1 from dual'. -->
+    <property name="preferredTestQuery" value='select 1;'/>
+
+    <!-- Specify the maximum number of seconds to keep an idle connection
+         (in this case, 7 hours). For mysql, it should be lower that the
+         wait_timeout mysqld option. wait_timeout is 8 hours by default. -->
+    <property name="maxIdleTime" value='25200'/>
+
+    <!-- Maximum Number of prepared statements that will be cached. Disabled
+         here. -->
+    <property name="maxStatements" value='0'/>
+
+    <!-- Convenient but expensive. -->
+    <!-- property name="testConnectionOnCheckout" value='true'/-->
+
+    <!-- For debugging purposes only. Very expensive. -->
+    <!--property name='debugUnreturnedConnectionStackTraces' value='true'/ -->
+
+  </bean>
+
+  <!-- Example for postgres. -->
+  <!-- bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"
+    destroy-method="close">
+    <property name="driverClass" value="org.postgresql.Driver" />
+    <property name="jdbcUrl" value="jdbc:postgresql://localhost/database" />
+    <property name="user" value="username" />
+    <property name="password" value="password" />
+    <property name="minPoolSize" value='5'/>
+    <property name="maxPoolSize" value='5'/>
+    <property name="checkoutTimeout" value='10000'/>
+  </bean -->
+
+  <!-- The application-wide data source. -->
+  <!-- bean id="dataSource"
+    class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName">
+      <value>com.mysql.jdbc.Driver</value>
+    </property>
+    <property name="url">
+      <value>jdbc:mysql://localhost/database</value>
+    </property>
+    <property name="username">
+      <value>username</value>
+    </property>
+    <property name="password">
+      <value>password</value>
+    </property>
+  </bean -->
+
+  <!-- The katari data source as an alias to dataSource. -->
+  <alias name="dataSource" alias="katari.dataSource"/>
+
+  <!-- Overrides the default top menu. -->
+  <katari:menuBar id='katari.menuBar'>
+    <katari:menuNode position='9000' name='Reports'/>
+    <katari:menuNode position='10000' name='Administration'/>
+    <katari:menuNode position='11000' name='Institutional'/>
+  </katari:menuBar>
+
+  <!-- Overrides the name of the marker table. -->
+  <bean class='com.globant.katari.core.spring.StringHolder'
+    name = 'katari.markerTable'
+    p:value = '${rootArtifactId.replace('-', '_')}_marker_666' />
+
+  <!-- We use the userDetailsService from the user module. -->
+  <alias name="user.userDetailsService" alias="katari.userDetailsService"/>
+
+  <!-- Overrides katari message source. -->
+  <bean id="katari.messageSource"
+    class="com.globant.katari.core.spring.KatariMessageSource"
+    p:basename="WEB-INF/lang/messages"
+    p:debugPrefix='../${rootArtifactId}-web/src/main/webapp'
+    p:debug-ref='debugMode'>
+    <constructor-arg index='0' value='en'/>
+  </bean>
+
+  <!-- Overrides the list of supported locales and the default locale. -->
+  <util:set id='katari.supportedLocales'>
+    <value>en</value>
+    <value>es</value>
+  </util:set>
+
+  <bean id="katari.defaultLocale" class="java.util.Locale">
+    <constructor-arg index='0' value='en'/>
+  </bean>
+
+
+  <!-- Defines the list of modules to exclude from the menu. Each entry is a
+       regular expression, so you can eliminate all menu items with:
+       -->
+  <!--
+  <util:list id='katari.moduleMenusToIgnore'>
+    <value>.*</value>
+  </util:list>
+  -->
+
+  <!-- Port mappings for HTTP/HTTPS access. -->
+  <bean id='katari.httpsPortMapper'
+      class='org.acegisecurity.util.PortMapperImpl'>
+    <property name='portMappings'>
+      <map>
+        <entry key='80' value='443' />
+        <entry key='8098' value='8097' />
+      </map>
+    </property>
+  </bean>
+
+  <!-- Additional permissions that can be added by the application writer.
+       These permissions will have more priority than the default ones. This
+       example allows the favicon to be accessed anonymously. -->
+  <bean id='katari.additionalRootPermissions'
+    class="org.springframework.beans.factory.config.MapFactoryBean">
+    <property name="targetMapClass" value="java.util.LinkedHashMap" />
+    <property name="sourceMap">
+      <map>
+        <entry key="/favicon.ico">
+          <list>
+            <value>IS_AUTHENTICATED_ANONYMOUSLY</value>
+          </list>
+        </entry>
+      </map>
+    </property>
+  </bean>
+
+  <!-- Sample configuration with the list of URLs that must be
+  accessed through HTTPS. -->
+  <!--
+  <bean id='katari.httpsUrls'
+      class='com.globant.katari.core.spring.StringHolder'>
+    <property name="value">
+      <value>
+          CONVERT_URL_TO_LOWERCASE_BEFORE_COMPARISON
+          PATTERN_TYPE_APACHE_ANT
+          module/local-login/login.do=REQUIRES_SECURE_CHANNEL
+      </value>
+    </property>
+  </bean>
+  -->
+
+  <!-- Here are some configuration examples for modules. -->
+
+  <!-- Enable captcha in the login page. The captcha stops robots from gessing
+       passwords by brute force. -->
+  <!--
+  <bean class='com.globant.katari.core.spring.StringHolder'
+    name='local-login.enableCaptcha' p:value='true'/>
+  -->
+
+  <!-- To configure the time an ip will be blacklisted. Defaults to 10 minutes.
+       Blacklisted ips are always shown a captcha.  -->
+  <!--
+  <bean class='com.globant.katari.core.spring.StringHolder'
+    name='local-login.ipBlacklistTimeout' p:value='600000'/>
+  -->
+
+  <!-- Always show the captcha in the login page. -->
+  <!--
+  <bean class='com.globant.katari.core.spring.StringHolder'
+    name='local-login.forceCaptcha' p:value='false'/>
+  -->
+
+  <!-- Configures the type of captcha. The value can be
+       local-login.captchaServiceEasy (default) or
+       local-login.captchaServiceHard. -->
+  <!--
+  <bean class='com.globant.katari.core.spring.StringHolder'
+    name='local-login.captchaServiceType'
+    p:value='local-login.captchaServiceEasy'/>
+  -->
+
+  <!-- Configures the query to perform to test if the database is alive. -->
+  <!--
+  <bean class='com.globant.katari.core.spring.StringHolder'
+    name = 'katari.pingDatabaseQuery'
+    p:value = 'select * from users where id = 1' />
+    -->
+
+  <!-- Configures FCKEditor for the editablepages module. -->
+  <!--
+  <bean id='editable-pages.fckEditorConfiguration'
+    class='com.globant.katari.editablepages.view.FckEditorConfiguration'
+    p:height='400'/>
+    -->
+
+  <!-- The server, url and context path where the war will be deployed. This is
+       needed for katari-shindig. -->
+  <bean id="shindig.hostAndPort"
+      class="com.globant.katari.core.spring.StringHolder">
+      <property name="value" value="localhost:8088" />
+  </bean>
+
+  <bean id="shindig.contextPath"
+      class="com.globant.katari.core.spring.StringHolder">
+      <property name="value" value="/${artifactId}" />
+  </bean>
+
+  <!-- Externalizes the location of katari data directory.
+       indexing.  -->
+  <bean id='katari.dataLocation'
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value-ref='dataLocation' />
+
+  <bean id='dataLocation'
+    class='com.globant.katari.core.spring.StringHolder'
+    p:value='target/data' />
+
+</beans>
+
+<!-- vim: set ts=2 et sw=2 ai: -->
+

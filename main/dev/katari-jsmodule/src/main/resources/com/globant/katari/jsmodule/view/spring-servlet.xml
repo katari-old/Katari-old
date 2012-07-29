@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:p="http://www.springframework.org/schema/p"
+  xmlns:katari="http://www.globant.com/schema/katari"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.globant.com/schema/katari
+    http://www.globant.com/schema/katari/katari.xsd">
+
+  <!-- freemarker config -->
+  <bean id="freemarkerConfig"
+    class="com.globant.katari.core.web.FreeMarkerConfigurer"
+    p:templateLoaderPath='classpath:/com/globant/katari/jsmodule/view/'
+    p:debugPrefix='../katari-jsmodule/src/main/resources'
+    p:debug-ref='debugMode'/>
+
+  <!-- View resolvers can also be configured with ResourceBundles or XML files.
+  If you need different view resolving based on Locale, you have to use the
+  resource bundle resolver. -->
+  <bean id="viewResolver"
+    class="com.globant.katari.core.web.FreeMarkerViewResolver"
+    p:prefix="/" p:suffix=".ftl"
+    p:exposeSpringMacroHelpers="true"
+    p:exposeRequestAttributes="true" />
+
+  <!-- End Points -->
+
+  <bean name="/com/globant/katari/jsmodule/action/resolveDependencies.do"
+    class="com.globant.katari.core.spring.controller.JsonCommandController">
+    <lookup-method name="createCommandBean"
+      bean="jsmodule.resolveDependenciesCommand" />
+  </bean>
+
+  <!-- Commands -->
+
+  <bean name="jsmodule.resolveDependenciesCommand" scope="prototype"
+      class="com.globant.katari.jsmodule.application.ResolveDependenciesCommand">
+    <constructor-arg index="0" ref="jsmodule.dependenciesResolver" />
+    <constructor-arg index="1" ref="jsmodule.bundleCache" />
+    <constructor-arg index="2" ref="debugMode" />
+  </bean>
+
+  <!-- Utilities -->
+
+  <bean name="jsmodule.dependenciesFinder"
+      class="com.globant.katari.jsmodule.domain.DependenciesFinder">
+  </bean>
+
+  <bean name="jsmodule.dependenciesResolver"
+      class="com.globant.katari.jsmodule.domain.DependenciesResolver">
+    <constructor-arg index="0" ref="jsmodule.dependenciesFinder" />
+  </bean>
+
+  <!-- vim: set ts=2 sw=2 et ai: -->
+</beans>
+

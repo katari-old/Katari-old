@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:util="http://www.springframework.org/schema/util"
+  xmlns:katari="http://www.globant.com/schema/katari"
+  xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-2.5.xsd
+      http://www.globant.com/schema/katari
+      http://www.globant.com/schema/katari/katari.xsd">
+
+  <!-- The coreuser module configuration file. This file must be included in
+       the application context to use this module. -->
+
+  <!-- We expose the coreuser repository as a public bean. It is used for the
+       security modules. -->
+  <bean id='coreuser.roleRepository'
+    class='com.globant.katari.hibernate.coreuser.domain.RoleRepository'>
+    <property name='sessionFactory'>
+      <ref bean='katari.sessionFactory' />
+    </property>
+  </bean>
+
+  <bean id='coreuser.userRepository'
+    class='com.globant.katari.hibernate.coreuser.domain.CoreUserRepository'>
+    <property name='sessionFactory'>
+      <ref bean='katari.sessionFactory' />
+    </property>
+  </bean>
+
+  <bean class='com.globant.katari.core.web.ListFactoryAppender'>
+    <constructor-arg value='katari.persistentClasses'/>
+    <constructor-arg>
+      <list>
+        <value>com.globant.katari.hibernate.coreuser.domain.Role</value>
+        <value>com.globant.katari.hibernate.coreuser.domain.CoreUser</value>
+      </list>
+    </constructor-arg>
+  </bean>
+</beans>
+
+<!-- vim: set ts=2 et sw=2 ai : -->
+

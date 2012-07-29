@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Module>
+  <!-- vim: set ts=2 et sw=2 ai: -->
+
+  <ModulePrefs
+    title="Activities Example"
+    icon="http://localhost:8098/katari-sample/module/sample/activities-icon.png"
+    description="This is an example gadget that shows activities and lets you
+    create new activities. This is just a sample open social gadget"
+    author="anonymous"
+    thumbnail="http://localhost:8098/katari-sample/module/sample/activities-screenshot.png"
+    >
+   
+   <!-- TODO: Migrate to latest version supported by shindig -->
+   <Require feature="opensocial-0.7"></Require>
+   <Require feature="dynamic-height"></Require>
+   <Require feature="settitle"></Require>
+
+ </ModulePrefs>
+
+ <Content type="html">
+   <![CDATA[
+   <style type="text/css">
+
+     body {
+       font-size: 0.8em;
+     }
+
+    .mediaitems {
+      padding-left: 5em;
+    }
+
+    .addActivityDiv {
+      clear:both;
+    }
+
+    #addActivityText {
+      color:#999999;
+      font-size:10pt;
+      font-weight:normal;
+      font-family:arial,helvetica,sans-serif;
+    }
+
+    #addActivity {
+      display:none;
+      padding: .5em;
+    }
+  </style>
+
+  <script type="text/javascript">
+
+    gadgets.util.registerOnLoadHandler(refreshActivities);
+
+    gadgets.window.setTitle("Activities");
+
+    function refreshActivities() {
+      var req = opensocial.newDataRequest();
+      if (!viewer) {
+        req.add(req.newFetchPersonRequest('VIEWER'), 'viewer');
+      }
+      req.add(req.newFetchActivitiesRequest('VIEWER'), 'viewerActivities');
+      req.send(handleActivities);
+    }
+
+    function postNewActivity() {
+      var activityElement = document.getElementById('newActivity');
+      var mediaItem = new Array(opensocial.newActivityMediaItem("image",
+        "http://localhost:8098/katari-sample/module/decorator/image/mainLogo.png",
+        {'type' : 'image'}));
+      var activity = opensocial.newActivity({
+        'title' : viewer.getDisplayName() + ' wrote: ' + activityElement.value,
+        'body' : 'activity created!', 'mediaItems' : mediaItem});
+
+      activityElement.value = '';
+      opensocial.requestCreateActivity(activity, "HIGH", refreshActivities);
+    }
+
+    var viewer;
+    var activities;
+    function handleActivities(dataResponse) {
+
+      if (!viewer) {
+        viewer = dataResponse.get('viewer').getData();
+      }
+
+      var viewerActivities = dataResponse.get('viewerActivities');
+
+      // There was an error obtaining the activities, show it to the user.
+      if (viewerActivities.hadError()) {
+        var html = 'Error processing response: ' +
+          viewerActivities.getErrorCode();
+        if (viewerActivities.getErrorMessage() != undefined) {
+          html += " " + viewerActivities.getErrorMessage();
+        }
+        document.getElementById('stream').innerHTML = '<li>' + html + '</li>';
+        document.getElementById('stream').style.display = 'block';
+        return;
+      }
+      activities = viewerActivities.getData()['activities'].asArray();
+
+      document.getElementById('stream').style.display = 'block';
+
+      var html = '';
+
+      if (!activities || activities.length == 0) {
+        document.getElementById('stream').innerHTML =
+          '<li>You do not have any activities yet</li>';
+        return;
+      }
+
+      gadgets.window.setTitle("Activities - last " + activities.length +
+        " shown");
+
+      for (var i = 0; i < activities.length; i++) {
+        html += '<li>On ';
+        html += new Date(activities[i].getField('postedTime')).toDateString()
+          + ', ';
+        html += activities[i].getField('title');
+
+        /*
+        html += '<div class="streamdescription"><a href="' +
+            activities[i].url + '">' + activities[i].getField('title') +
+            '</a></div>';
+        */
+        /*
+        html += '<div class="streamcontents">';
+        html += '>>>';
+
+        var body = activities[i].getField('body') || '';
+        html += '<span class="streamhtmlcontents">' + body + '</span>';
+        html += '</div>';
+        */
+
+        html += '<div class="mediaitems">';
+        var mediaItems = activities[i].getField('mediaItems');
+        if (mediaItems) {
+          for (var j = 0; j < mediaItems.length; j++) {
+            if (mediaItems[j].getField('type') == 'image') {
+              html += '<img height="150px" style="padding-right:.5em;"' +
+                ' src="' + mediaItems[j].getField('url') + '"/>';
+            }
+          }
+        }
+        html += '</div>';
+
+        var shortUrl = activities[i].getField('url');
+        if (shortUrl) {
+          if (shortUrl.indexOf('http://') == 0) {
+            shortUrl = shortUrl.substring(7);
+          }
+          html += '<div class="streamurl"><a href="'
+              + activities[i].getField('url') + '">' + shortUrl + '</a></div>';
+        }
+
+        html += '</li>';
+      }
+      document.getElementById('stream').innerHTML = html;
+      gadgets.window.adjustHeight();
+    }
+
+    function hideShowDiv(divToShow, divToHide) {
+      document.getElementById(divToShow).style.display = 'block';
+      document.getElementById(divToHide).style.display = 'none';
+      gadgets.window.adjustHeight();
+    }
+  </script>
+
+  <div class="addActivityDiv">
+    <a id="addActivityText"
+      href="#"
+      onclick="hideShowDiv('addActivity','addActivityText'); return false;">
+      Add your own activity
+    </a>
+    <div id="addActivity">
+      <input id="newActivity" type="text"/>
+      <input type="button" onclick="postNewActivity(); return false;" value="add"/>
+      <input type="button"
+        onclick="hideShowDiv('addActivityText','addActivity'); return false;"
+        value="cancel"/>
+    </div>
+  </div>
+  <ul id="stream" style="display:none"></ul>
+
+  ]]>
+  </Content>
+</Module>
+

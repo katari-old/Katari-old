@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:katari="http://www.globant.com/schema/katari"
+      xmlns:p="http://www.springframework.org/schema/p"
+      xmlns:util="http://www.springframework.org/schema/util"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+      http://www.globant.com/schema/katari
+      http://www.globant.com/schema/katari/katari.xsd
+      http://www.springframework.org/schema/util
+      http://www.springframework.org/schema/util/spring-util-2.0.xsd">
+
+  <description>
+    Katari hibernate spring application context. This context contains
+    hibernate dependent beans.
+  </description>
+
+  <!-- Hibernate SessionFactory -->
+  <bean id="katari.sessionFactory"
+    class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
+    lazy-init="true">
+    <property name="dataSource" ref="katari.lazyDataSource" />
+    <property name="hibernateProperties" ref='katari.hibernateProperties'/>
+    <property name="annotatedClasses" ref='katari.persistentClasses' />
+  </bean>
+
+  <util:list id='katari.persistentClasses'/>
+
+  <!-- Transaction manager for a single Hibernate SessionFactory. -->
+  <bean id="katari.transactionManager" lazy-init="true"
+    class="org.springframework.orm.hibernate3.HibernateTransactionManager"
+    p:sessionFactory-ref="katari.sessionFactory"
+    p:dataSource-ref="katari.lazyDataSource" />
+
+  <!-- Adds a database checker to the list of ping services -->
+  <bean class='com.globant.katari.core.web.ListFactoryAppender'>
+    <constructor-arg value='katari.pingServices'/>
+    <constructor-arg>
+      <list>
+        <!-- The database ping -->
+        <bean class="com.globant.katari.hibernate.PingDatabase">
+          <constructor-arg ref="katari.lazyDataSource"/>
+          <constructor-arg ref='katari.pingDatabaseQuery'/>
+          <constructor-arg ref="katari.developmentDataBaseChecker"/>
+        </bean>
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <!-- ============================================================= -->
+  <!-- ================== Security related beans =================== -->
+  <!-- ============================================================= -->
+
+  <!-- A bean to override the query to perform to test if the database is
+       alive. -->
+  <bean class='com.globant.katari.core.spring.StringHolder'
+    name = 'katari.pingDatabaseQuery'
+    p:value = 'select * from users where id = 1' />
+
+  <!-- A bean to override the marker table. -->
+  <bean class='com.globant.katari.core.spring.StringHolder'
+    name = 'katari.markerTable' p:value = 'katari_marker_666' />
+
+  <!-- A utility bean that checks if the application is running against a
+  development database. -->
+  <bean id="katari.developmentDataBaseChecker"
+    class="com.globant.katari.hibernate.DevelopmentDataBaseChecker">
+    <constructor-arg ref="katari.lazyDataSource"/>
+    <constructor-arg ref='katari.markerTable'/>
+  </bean>
+
+  <!-- Data source to use on beans that may be used in post processors.
+       
+  This was motivated by the katari-monitoring module that needs to post-process
+  the data source to monitor jdbc connections. -->
+  <bean id='katari.lazyDataSource'
+    class="org.springframework.aop.framework.ProxyFactoryBean">
+    <property name="targetSource">
+      <bean class="org.springframework.aop.target.LazyInitTargetSource">
+        <property name="targetBeanName" value="katari.dataSource"/>
+      </bean>
+    </property>
+  </bean>
+</beans>
+
+<!-- vim: set ts=2 et sw=2 ai: -->
+

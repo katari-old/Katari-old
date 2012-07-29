@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  <!-- vim: set ts=2 et sw=2 : -->
+
+  <parent>
+    <groupId>com.globant.katari</groupId>
+    <artifactId>dev</artifactId>
+    <version>0.46-SNAPSHOT</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.globant.katari</groupId>
+  <artifactId>katari-gadget-container</artifactId>
+  <packaging>jar</packaging>
+  <name>Katari - gadget container</name>
+
+  <dependencies>
+    <!-- Test only dependencies -->
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.easymock</groupId>
+      <artifactId>easymock</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-test</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.globant.katari</groupId>
+      <artifactId>katari-tools</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.globant.katari</groupId>
+      <artifactId>katari-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.globant.katari</groupId>
+      <artifactId>katari-hibernate</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.globant.katari</groupId>
+      <artifactId>katari-shindig</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-logging</groupId>
+      <artifactId>commons-logging</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate.javax.persistence</groupId>
+      <artifactId>hibernate-jpa-2.0-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.hibernate</groupId>
+      <artifactId>hibernate-annotations</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-webmvc</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>hsqldb</groupId>
+      <artifactId>hsqldb</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>c3p0</groupId>
+      <artifactId>c3p0</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <!-- Package you JS files as resources in target jar. -->
+    <!-- This is not that nice, it would be better not to specify the default
+         resources directory. -->
+    <resources>
+      <resource>
+        <directory>src/main/js</directory>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+      </resource>
+    </resources>
+
+    <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>groovy-maven-plugin</artifactId>
+        <!-- extensions>true</extensions -->
+        <executions>
+          <execution>
+            <id>uxf2png</id>
+            <phase>pre-site</phase>
+            <goals>
+              <goal>execute</goal>
+            </goals>
+            <configuration>
+              <source>
+                <![CDATA[
+                srcdir = project.basedir.canonicalPath + "/src/site/uxf"
+                targetdir = project.build.directory + "/site/images/"
+                new File(targetdir).mkdirs()
+                dir = new File(srcdir)
+                log.info("Converting uml diagrams ...")
+
+                new java.io.File(srcdir).eachFileRecurse({
+                  file ->
+                    if(file.name.matches("^.*\\.uxf\$")) {
+                      target = targetdir + file.name.replace('.uxf','.png')
+                      handler = new com.umlet.control.diagram.DiagramHandler(file);
+                      handler.getFileHandler().doExportAs("png", target);
+                    }})
+                ]]>
+              </source>
+            </configuration>
+          </execution>
+        </executions>
+        <inherited>false</inherited>
+      </plugin>
+    </plugins>
+
+  </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>gr.abiss.mvn.plugins</groupId>
+        <artifactId>maven-jstools-plugin</artifactId>
+        <version>0.7</version>
+        <configuration>
+          <!-- Workaround: muiltimodule site build fails without this, with an
+               error saying that src/main/js was not found. Run mvn site in the
+               parent directory to verify. -->
+          <jsDir>${basedir}/src/main/js</jsDir>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
+
+</project>

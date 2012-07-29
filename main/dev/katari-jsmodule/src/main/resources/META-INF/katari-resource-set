@@ -1,0 +1,6 @@
+staticContentPath=/com/globant/katari/jsmodule/js
+
+mimeType.js=text/javascript
+
+debugPrefix=../katari-jsmodule/src/test/resources
+

@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<faqs id="Problem related FAQ">
+  <part id="Problems">
+    <faq id="jetty-inplace">
+      <question>Why is jetty ignoring my changes?</question>
+      <answer>
+        <p>
+          You probably ran mvn war:inplace in a previous build. This copies the
+          compiled classes and third party libraries to
+          main/src/webapp/WEB-INF/classes and main/src/webapp/WEB-INF/lib.
+          Remove both directories, restart jetty, and it shuld work.
+        </p>
+      </answer>
+    </faq>
+    <faq id="tomcat-6">
+      <question>Deploying in tomcat 6 fails with a linkage error related to
+        javax.el</question>
+      <answer>
+        <p>
+          Tomcat 6 bundles javax.el somewhere in the classloader hierarchy. The
+          katari-shindig module also uses javax.el, and brings the
+          implementation (juel-impl) and the api (juel-api - this contains
+          javax.el). To create a war that can be deployed in tomcat 6, add:
+        </p>
+        <source>
+    <![CDATA[    <dependency>
+      <groupId>de.odysseus.juel</groupId>
+      <artifactId>juel-impl</artifactId>
+      <version>2.1.2</version>
+      <exclusions>
+        <exclusion>
+          <groupId>de.odysseus.juel</groupId>
+          <artifactId>juel-api</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>]]>
+        </source>
+        <p>
+          to the dependencyManagement section.
+        </p>
+        <p>
+          Unfortunately, it is not possible to create a war that will run both
+          in tomcat 6 and tomcat 5.5.
+        </p>
+      </answer>
+    </faq>
+  </part>
+  <!-- vim: set ts=2 et sw=2 ai tw=80 fo=t: -->
+</faqs>
+

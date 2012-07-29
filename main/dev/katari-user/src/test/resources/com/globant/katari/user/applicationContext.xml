@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xmlns:p="http://www.springframework.org/schema/p"
+      xmlns:katari="http://www.globant.com/schema/katari"
+      xmlns:camel="http://camel.apache.org/schema/spring"
+      xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+        http://www.globant.com/schema/katari
+        http://www.globant.com/schema/katari/katari.xsd
+        http://camel.apache.org/schema/spring
+        http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+  <import resource="classpath:com/globant/katari/core/beans-core.xml"/>
+  <import resource="classpath:com/globant/katari/hibernate/beans-hibernate.xml"/>
+  <import resource="classpath:com/globant/katari/hibernate/coreuser/module.xml"/>
+  <import resource="classpath:com/globant/katari/user/module.xml"/>
+
+  <bean id="dataSource"
+    class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+    <property name="driverClassName" value='org.hsqldb.jdbcDriver'/>
+    <property name="url" value="jdbc:hsqldb:mem:testdb"/>
+    <property name="username" value="sa"/>
+    <property name="password" value=""/>
+  </bean>
+
+  <bean id="katari.hibernateProperties"
+    class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+    <property name="properties">
+      <props>
+        <prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+        <prop key="hibernate.hbm2ddl.auto">create-drop</prop>
+        <!-- Avoid this, use log4j.logger.org.hibernate.SQL=DEBUG instead
+             prop key="hibernate.show_sql">true</prop -->
+      </props>
+    </property>
+  </bean>
+
+  <alias name="dataSource" alias="katari.dataSource"/>
+
+  <!-- Configures a list of listeners for the direct:katari.user.deleteUser
+       endpoint. -->
+  <bean class='com.globant.katari.core.web.ListFactoryAppender'>
+    <constructor-arg value='user.deleteUserListeners'/>
+    <constructor-arg>
+      <list>
+        <bean class='org.apache.camel.model.ToDefinition' p:uri='x' />
+        <bean class='org.apache.camel.model.ToDefinition' p:uri='y' />
+        <bean class='org.apache.camel.model.ToDefinition' p:uri='z' />
+      </list>
+    </constructor-arg>
+  </bean>
+
+  <camel:endpoint id='x'
+    uri="class:com.globant.katari.user.application.DeleteEventTest$Listener1"/>
+  <camel:endpoint id='y'
+    uri="class:com.globant.katari.user.application.DeleteEventTest$Listener2"/>
+  <camel:endpoint id='z'
+    uri="class:com.globant.katari.user.application.DeleteEventTest$Listener3"/>
+
+</beans>
+
+<!-- vim: set ts=2 et sw=2 ai: -->
+

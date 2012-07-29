@@ -1,0 +1,140 @@
+#set($symbol_dollar = '$')
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+  http://maven.apache.org/maven-v4_0_0.xsd">
+
+  <parent>
+    <groupId>com.globant.maven</groupId>
+    <artifactId>globant-parent</artifactId>
+    <version>1.17</version>
+  </parent>
+
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>\${groupId}</groupId>
+  <artifactId>\${artifactId}</artifactId>
+  <version>\${version}</version>
+  <packaging>pom</packaging>
+  <name>\${friendlyName}</name>
+  <url>
+    http://maven.corp.globant.com/nexus/content/repositories/${rootArtifactId}-site/\${groupId}/\${rootArtifactId}/${symbol_dollar}{version}
+  </url>
+
+  <prerequisites>
+    <maven>2.2</maven>
+  </prerequisites>
+
+  <build>
+
+    <plugins>
+
+      <!-- Version 2.1 fails with something related to a duplicate version of
+           commons logging (version 1.0.4). See
+           http://jira.codehaus.org/browse/MSITE-459. The doxia dependency is a
+           workaround found in that ticket.
+           -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>2.1.1</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.apache.maven.doxia</groupId>
+            <artifactId>doxia-module-xhtml</artifactId>
+            <version>1.1.3</version>
+            <exclusions>
+              <exclusion>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+              </exclusion>
+            </exclusions>
+          </dependency>
+        </dependencies>
+      </plugin>
+
+      <!-- Prepares and performs the release. This basically deploys the
+      distribution package configured in the assembly-plugin.
+      -->
+      <plugin>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>${dependency.release-plugin.version}</version>
+        <configuration>
+          <!-- Where to tag -->
+          <tagBase>http://svn.globant.com/svn/\${artifactId}/release</tagBase>
+          <goals>install site-deploy assembly:attached deploy</goals>
+          <autoVersionSubmodules>true</autoVersionSubmodules>
+        </configuration>
+      </plugin>
+
+      <!-- Builds a distribution package. -->
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <version>${dependency.assembly-plugin.version}</version>
+        <inherited>false</inherited>
+        <configuration>
+          <descriptors>
+            <descriptor>dev/src/main/assemble/bin.xml</descriptor>
+          </descriptors>
+        </configuration>
+      </plugin>
+
+    </plugins>
+
+  </build>
+
+  <!-- The scm information used by continuous integration and documentation. -->
+  <scm>
+    <connection>scm:svn:http://svn.globant.com/svn/\${artifactId}/main</connection>
+    <developerConnection>scm:svn:http://svn.globant.com/svn/\${artifactId}/main</developerConnection>
+    <url>http://svn.globant.com/svn/\${artifactId}/main</url>
+  </scm>
+
+  <repositories>
+    <repository>
+      <id>globant-public-releases</id>
+      <name>globant-public-releases</name>
+      <!-- If I use ${repositoryRoot}, maven does not find the parent pom. -->
+      <url>https://projects.globant.com/nexus/content/repositories/globant</url>
+    </repository>
+  </repositories>
+
+  <pluginRepositories>
+    <pluginRepository>
+      <id>globant-public-releases</id>
+      <name>globant-public-releases</name>
+      <url>${repositoryRoot}/globant</url>
+    </pluginRepository>
+  </pluginRepositories>
+
+  <!-- The location where deploy and site-deploy leaves the artifacts -->
+  <distributionManagement>
+    <repository>
+      <id>\${rootArtifactId}-artifacts-repository</id>
+      <url>dav:http://maven.corp.globant.com/nexus/content/repositories/${rootArtifactId}</url>
+    </repository>
+    <site>
+      <id>\${rootArtifactId}-artifacts-repository</id>
+      <url>dav:http://maven.corp.globant.com/nexus/content/repositories/${rootArtifactId}-site/\${groupId}/\${rootArtifactId}/${symbol_dollar}{version}</url>
+    </site>
+  </distributionManagement>
+
+  <!-- Continuous integration configuration -->
+  <ciManagement>
+    <system>hudson</system>
+    <url>http://portobello.globant.com:8081/hudson/job/katari</url>
+  </ciManagement>
+
+  <mailingLists>
+    <mailingList>
+      <name>\${artifactId.replace('-', '_')}@globant.com</name>
+      <subscribe>http://mailman.corp.globant.com/mailman/listinfo/\${artifactId.replace('-', '_')}</subscribe>
+      <unsubscribe>http://mailman.corp.globant.com/mailman/listinfo/\${artifactId.replace('-', '_')}</unsubscribe>
+      <post>\${artifactId.replace('-', '_')}@globant.com</post>
+      <archive>http://mailman.corp.globant.com/mailman/private/\${artifactId.replace('-', '_')}</archive>
+    </mailingList>
+  </mailingLists>
+
+  <!-- vim: set ts=2 et sw=2 ai: -->
+</project>
+

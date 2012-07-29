@@ -1,0 +1,30 @@
+<decorators defaultdir="/">
+
+  <!-- We do not decorate cas module urls and the weblets -->
+  <excludes>
+    <pattern>/module/cas/proxyValidate*</pattern>
+    <pattern>/module/ajax/*</pattern>
+    <pattern>*/weblet/*</pattern>
+    <!-- FCKEditor pages must not be decorated. -->
+    <pattern>/module/ajax/fckeditor/editor/fckdialog.html</pattern>
+    <!-- Social must not be decorated -->
+    <pattern>/module/gadgetcontainer/assets/*</pattern>
+    <pattern>/module/shindig/*</pattern>
+  </excludes>
+
+  <!-- Uncomment to decorate login/logout related pages, for example, if you
+       don't want to show the menu for the login page. -->
+  <!--
+  <decorator name="login" charset="utf-8" page="/module/decorator/login.dec">
+    <pattern>/module/local-login/*</pattern>
+  </decorator>
+  -->
+
+  <!-- Decorate the rest of the pages. -->
+  <decorator name="main" charset="utf-8" page="/module/decorator/main.dec">
+    <pattern>*</pattern>
+  </decorator>
+
+ <!-- vim: set ts=2 et sw=2 : -->
+</decorators>
+
