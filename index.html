@@ -38,18 +38,221 @@
               <li>Secured and non-secured content. A login page allows you to access secured content.</li>
               <li>A nice styled site, where all styling element are under your control.</li>
               <li>A security aware menu structure.</li>
+              <li>Apache camel integration</li>
+              <li>Quartz-Scheduler integration</li>
+              <li>Apache Shindig & Gadget Container</li>
               <li>Sample pages that can be edited on line with the help of FCKEditor.</li>
             </ul>
-            <p>
-              <div>When you start a project with Katari you will also find a strong reliance on best practices:</div>
-              <ul>
-                <li>Code is well documented, consistently formatted and easy to read.</li>
-                <li>You will find testing (unit and integration) already in place, with a nice approach to integrating tests that hits the database.</li>
-                <li>Katari modular approach will make it easier to develop guided by business driven requirements.</li>
-                <li>You can get started in Katari with the help of the provided maven archetype (yes, it uses maven). The getting started guide will give you instructions on how to start with Katari.</li>
-              </ul>
-            </p>
+          <p>
+            <p>When you start a project with Katari you will also find a strong reliance on best practices:</p>
+            <ul>
+              <li>Code is well documented, consistently formatted and easy to read.</li>
+              <li>You will find testing (unit and integration) already in place, with a nice approach to integrating tests that hits the database.</li>
+              <li>Katari modular approach will make it easier to develop guided by business driven requirements.</li>
+              <li>You can get started in Katari with the help of the provided maven archetype (yes, it uses maven). The getting started guide will give you instructions on how to start with Katari.</li>
+            </ul>
           </p>
+        </section>
+        <section id="starting" class="inner">
+      <div id="contentBox">
+        <!-- ~ vim: set sw=1 et ts=1 tw=80 ai: --><div class="section"><h3>Starting a Katari project<a name="Starting_a_Katari_project"></a></h3><p>To demonstrate how to start a project from scratch with Katari, We will be creating a sample application called acme-coyote. But first you need:</p><ul><li>java-1.5 or above.</li><li>maven-2.2.1 or above. It will probably work from maven 2.1. Maven 2.0.x packaged an old version of jtidy classes that clashes with jetty.</li><li>mysql-5.x.</li></ul><p>Katari provides a maven archetype to make it easy to start a new project:</p><div><pre>mvn archetype:generate -DarchetypeArtifactId=katari-archetype \
+  -DarchetypeGroupId=com.globant.katari -DarchetypeVersion=0.42 \
+  -DarchetypeRepository=&quot;http://katari.globant.com/nexus/content/repositories/globant&quot; \
+  -Drepository=&quot;http://katari.globant.com/nexus/content/repositories/globant&quot;</pre></div><p>This will ask for the following information:</p><ul><li>the project friendly name</li><li>the group id</li><li>the artifact id</li><li>the project version.</li></ul><p>For consistency, we recommend the groupId is of the form <i>your domain</i>.<i>artifactId</i>.</p><p>You can also create the project in batch mode, passing all the information in the command line. To see it in action, lets create the coyote application for our client acme:</p><div><pre>mvn archetype:generate -DarchetypeArtifactId=katari-archetype \
+  -DarchetypeGroupId=com.globant.katari -DarchetypeVersion=0.42 \
+  -DarchetypeRepository=&quot;http://katari.globant.com/nexus/content/repositories/globant&quot; \
+  -Drepository=&quot;http://katari.globant.com/nexus/content/repositories/globant&quot; \
+  -DinteractiveMode=false \
+  -DfriendlyName=&quot;Acme tools for the coyote&quot; \
+  -DgroupId=com.globant.acme.coyote -DartifactId=acme-coyote</pre></div><p>This creates a full fledged application with the following features:</p><ul><li>Menu management.</li><li>Security.</li><li>A login page.</li><li>A report management module.</li><li>A module that allows users to edit html pages.</li></ul><p>(Note: if you are behind a proxy, you may be hit by bug http://jira.codehaus.org/browse/ARCHETYPE-202: maven will freeze for a minute or two trying to download archetype-catalog.xml. Add -DarchetypeCatalog=local to speed things up.)</p><p>Once the archetype finishes, you will find a directory called acme-coyote. There you will find:</p><div><pre>pom.xml
+dev
+ |-- acme-coyote-style
+ |   |-- src
+ |   |   |-- main
+ |   |   `-- site
+ |   `-- pom.xml
+ |-- acme-coyote-web
+ |   |-- src
+ |   |   |-- main
+ |   |   |   |-- java
+ |   |   |   |-- resources
+ |   |   |   |-- sql
+ |   |   |   `-- webapp
+ |   |   |       |-- index.jsp
+ |   |   |       `-- WEB-INF
+ |   |   |           |-- applicationContext.xml
+ |   |   |           |-- applicationContextRuntime.xml
+ |   |   |           `-- web.xml
+ |   |   `-- site
+ |   `-- pom.xml
+ |-- src
+ |   |-- main
+ |   |   |-- assemble
+ |   |   `-- config
+ |   `-- site
+ |       |-- apt
+ |       |   |-- index.apt
+ |       |   `-- *.apt
+ |       `-- site.xml
+ |-- pom.xml
+ `-- README</pre></div><p>The structure follows Globant CMMi standards, with a dev top level module. Below that, the archetype creates two modules: web and style.</p><p>The dev/README provides the necessary information to getting started with the project. So follow the instructions under the 'Quick start guide' title and you will have a running Katari application hitting a database.</p><p>When you run jetty, it will tell you in which port it is running (usually port 8088). So open in the browser http://localhost:8088/acme-coyote-web, and you will see the home page for anonymous users.</p><img src="images/katari-home.png" alt="Katari home page for anonymous users." /><p>If you click the login link, you can log in using admin for the username and admin for the password, as show in the login page.</p><img src="images/katari-login.png" alt="Katari login page." /><p>After a successful login you will see the katari home page for logged in users. You notice that you now have additional menus, all accesible to the roles that the admin user has. If you now navigate to the home page, you will also see a new icon at the top right corner. This icon, shown when you have the correct roles, allows users to edit the page.</p><img src="images/katari-home-loggedin.png" alt="Katari home page for logged in user." /><p>Now you have acces to new menu entries due to the administrator privileges granted to admin.</p></div><div class="section"><h3>Creating your first module<a name="Creating_your_first_module"></a></h3><p>We will now create a module named hello in the previous project. Katari provides a maven archetype to create modules. Go to the dev directory created in the previous step and run:</p><div><pre> mvn archetype:generate -DarchetypeArtifactId=katari-module-archetype \
+  -DarchetypeGroupId=com.globant.katari -DarchetypeVersion=0.42 \
+  -DarchetypeRepository=&quot;http://katari.globant.com/nexus/content/repositories/globant&quot; \
+  -Drepository=&quot;http://katari.globant.com/nexus/content/repositories/globant&quot; \
+  -DinteractiveMode=false \
+  -DfriendlyName=&quot;Acme tools for the coyote - hello&quot; \
+  -DgroupId=com.globant.acme.coyote \
+  -DartifactId=acme-coyote-hello -DmoduleName=hello</pre></div><p>This creates a new maven module under the directory acme-coyote-hello. This directory now contains a maven project with acme-coyote-hello artifactId. The directory structure created by the archetype is:</p><div><pre>acme-coyote-hello
+|-- pom.xml
+`-- src
+    |-- main
+    |   |-- java/com/globant/acme/coyote/hello/view
+    |   |                                       `-- HelloController.java
+    |   `-- resources/com/globant/acme/coyote/hello
+    |                                           |-- module.xml
+    |                                           `-- view
+    |                                               |-- hello.ftl
+    |                                               `-- spring-servlet.xml
+    |-- site
+    |   |-- apt
+    |   |   `-- index.apt
+    |   `-- site.xml
+    `-- test
+        |-- java/com/globant/acme/coyote/hello
+        |                                  |-- SpringModuleTest.java
+        |                                  `-- view
+        |                                      |-- HelloControllerTest.java
+        |                                      `-- SpringServletTest.java
+        `-- resources
+            `-- log4j.properties</pre></div><p>The generated maven package contains a katari module described in:</p><div><pre>src/main/resources/com/globant/acme/coyote/hello/module.xml:
 
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+  xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+  xmlns:katari=&quot;http://www.globant.com/schema/katari&quot;
+  xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.globant.com/schema/katari
+    http://www.globant.com/schema/katari/katari.xsd&quot;&gt;
+
+  &lt;bean id=&quot;hello.module&quot; class=&quot;com.globant.katari.core.web.ConfigurableModule&quot;&gt;
+    &lt;property name=&quot;entryPoints&quot;&gt;
+      &lt;!--
+        The servlet mappings. It maps the spring DispatcherServlet to *.do.
+      --&gt;
+      &lt;bean class=&quot;org.springframework.beans.factory.config.MapFactoryBean&quot;&gt;
+        &lt;property name=&quot;sourceMap&quot;&gt;
+          &lt;map&gt;
+            &lt;!-- The spring-mvc controller servlet --&gt;
+            &lt;entry key=&quot;.*\.do&quot;&gt;
+              &lt;bean class=&quot;com.globant.katari.core.web.ServletAndParameters&quot;&gt;
+                &lt;constructor-arg index=&quot;0&quot;&gt;
+                  &lt;bean class=&quot;com.globant.katari.core.web.DispatcherServlet&quot; /&gt;
+                &lt;/constructor-arg&gt;
+                &lt;constructor-arg index=&quot;1&quot;&gt;
+                  &lt;map&gt;
+                    &lt;entry key=&quot;contextConfigLocation&quot;&gt;
+                      &lt;value&gt;
+                        classpath:/com/globant/acme/coyote/hello/view/spring-servlet.xml
+                      &lt;/value&gt;
+                    &lt;/entry&gt;
+                  &lt;/map&gt;
+                &lt;/constructor-arg&gt;
+              &lt;/bean&gt;
+            &lt;/entry&gt;
+          &lt;/map&gt;
+        &lt;/property&gt;
+      &lt;/bean&gt;
+    &lt;/property&gt;
+  &lt;/bean&gt;
+&lt;/beans&gt;</pre></div><p>This file is a standard spring bean definition file. It must contain a bean named <i>module-name</i>.module, of a type that implements Module. The most common implementation is ConfigurableModule, that is a simple pojo with setters for all the properties.</p><p>This looks complex, but is is simply a servlet configuration equivalent to what you would do in web.xml, but in spring style. This entryPoints property of the hello.module bean is a map of regular expressions to servlets. This example maps all requests ending in .do to the DispatcherServlet of spring. This DispatcherServlet is configured with the servlet parameter contextConfigLocation set to the full classpath to spring-servlet.xml. The spring-servlet.xml file is the standard bean definition file that contains the spring controllers.</p><p>When a user makes a request to <i>context-path</i>/module/hello/<i>whatever</i>.do, this request is routed to the hello module, the <i>whatever</i>.do fragment is matched with the defined entry points for that module and finally routed to the corresponding servlet.</p><p>This module declares a spring dispatcher servlet configured in:</p><div><pre>src/main/resources/com/globant/acme/coyote/hello/view/spring-servlet.xml</pre></div><p>This file declares a spring controller (HelloController) that listens to the /hello.do request:</p><div><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+  xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+  xmlns:p=&quot;http://www.springframework.org/schema/p&quot;
+  xmlns:katari=&quot;http://www.globant.com/schema/katari&quot;
+  xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.globant.com/schema/katari
+    http://www.globant.com/schema/katari/katari.xsd&quot;&gt;
+
+  &lt;!-- freemarker config --&gt;
+  &lt;bean id=&quot;freemarkerConfig&quot; class=&quot;com.globant.katari.core.web.FreeMarkerConfigurer&quot;
+    p:templateLoaderPath='classpath:/com/globant/acme/coyote/hello/view/'
+    p:debugPrefix='../acme-coyote-hello/src/main/resources'
+    p:debug-ref='debugMode'/&gt;
+
+  &lt;!-- View resolvers can also be configured with ResourceBundles or XML files.
+  If you need different view resolving based on Locale, you have to use the
+  resource bundle resolver. --&gt;
+  &lt;bean id=&quot;viewResolver&quot;
+    class=&quot;com.globant.katari.core.web.FreeMarkerViewResolver&quot;
+    p:prefix=&quot;/&quot; p:suffix=&quot;.ftl&quot;
+    p:exposeSpringMacroHelpers=&quot;true&quot;
+    p:exposeRequestAttributes=&quot;true&quot; /&gt;
+
+  &lt;bean name='/hello.do'
+    class='com.globant.acme.coyote.hello.view.HelloController'/&gt;
+
+&lt;/beans&gt;</pre></div><p>As you can see, this file looks like a standard spring-mvc dispatcher servlet configuration file. The only things to notice are related to the freemarkerConfig bean. This bean is from a katari package instead of spring's. This is really optional (you can use the one provided by spring), but Katari's implementation adds a nice feature: Katari searches ftl files from the file system if debug mode is enabled. This makes it very convenient to edit ftl and view the result in the browser on the fly. This feature is enabled with the debug and debugPrefix properties. debugPrefix is the path relative to the web application were katari will search for the ftl files.</p><p>This file must be included in your main application context, webapp/WEB-INF/applicationContext.xml. When the application loads, it finds and initializes all beans implementing the Module interface.</p><p>So, what is a module for Katari? A module is a vertical cut in an application, comprising all the typical layers: view (controllers and views, in spring jargon), application layer (facades or commads), domain layer (repositories, entities, domain services, etc, in Domain Driven Design parlance), and the persistence or integration layer (usually hibernate).</p><p>A module can be packaged in its own jar and reused in other applications. The Katari core takes care of integrating the module features.</p><p>The module archetype creates a hello world page.</p><p>Our hello world page will have the view and application layers. Create a new package for both layers (application and view) under the hello package.</p><p>The archetype creates a controller named HelloController in the view package that extends AbstractController.</p><p>This class implements handleRequestInternal and returns a ModelAndView instance for the 'hello' view:</p><div><pre>package com.globant.acme.coyote.hello.view;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.AbstractController;
+
+/** Spring MVC controller to show a hello message.
+ */
+public class HelloController extends AbstractController {
+
+  /** Forwards the request to the hello view.
+   *
+   * {@inheritDoc}
+   */
+  @Override
+  protected ModelAndView handleRequestInternal(final HttpServletRequest
+      request, final HttpServletResponse response) throws Exception {
+    ModelAndView mav = new ModelAndView(&quot;hello&quot;);
+    return mav;
+  }
+}</pre></div><p>The generated view, a freemarker template, is called hello.ftl:</p><div><pre>&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;Hello&lt;/title&gt;
+  &lt;/head&gt;
+
+  &lt;body&gt;
+    &lt;h3&gt;Hello&lt;/h3&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</pre></div><p>The archetype created a new module but it is not yet registered in your application. You need to add the correct dependencies in your webapp, and register the module in katari.</p><p>To declare the dependencies, add to dev/pom.xml somewhere in the dependencyManagement section:</p><div><pre>&lt;dependency&gt;
+  &lt;groupId&gt;com.globant.acme.coyote&lt;/groupId&gt;
+  &lt;artifactId&gt;acme-coyote-hello&lt;/artifactId&gt;
+  &lt;version&gt;1.0-SNAPSHOT&lt;/version&gt;
+&lt;/dependency&gt;</pre></div><p>And in dev/acme-coyote-web, somewhere in the dependencies section:</p><div><pre>&lt;dependency&gt;
+  &lt;groupId&gt;com.globant.acme.coyote&lt;/groupId&gt;
+  &lt;artifactId&gt;acme-coyote-hello&lt;/artifactId&gt;
+&lt;/dependency&gt;</pre></div><p>This is just maven standard dependecy management information. It is a good practice to centally declare the versions of all dependencies in your modules, so you don't accidentally mix different versions for the same library. This is what the dependencyManagement element of dev/pom.xml is for.</p><p>To register the module in katari, open the applicationContext.xml under webapp/WEB-INF and add a line of the form:</p><div><pre>&lt;!-- The hello module. It is a simple almost empty module. --&gt;
+&lt;katari:import module=&quot;com.globant.acme.coyote.hello&quot;/&gt;</pre></div><p>Now, compile and run the app:</p><div><pre>mvn jetty:run</pre></div><p>Go to the app, login and hit /module/hello/hello.do. You will see the expected hello text.</p><p>There is no link in the app that points to the new page. Let's add a menu entry for this. Open the module.xml file and add a new property menuBar to the hello.module bean:</p><div><pre>&lt;property name='menuBar'&gt;
+  &lt;!-- The menu bar. --&gt;
+  &lt;katari:menuBar&gt;
+    &lt;katari:menuNode name='Hello'&gt;
+      &lt;katari:menuItem name='SayHello' link='hello.do' /&gt;
+    &lt;/katari:menuNode&gt;
+  &lt;/katari:menuBar&gt;
+&lt;/property&gt;</pre></div><p>restart jetty (mvn jetty:run) and see the result.</p><p>But to say hello you don't want to be authenticated. Lets change that. Edit again the module.xml and add the following property to the hello.module bean:</p><div><pre>&lt;property name=&quot;urlToRoleMapper&quot;&gt;
+  &lt;bean class=&quot;com.globant.katari.core.security.StaticUrlToRoleMapper&quot;
+      id='report.urlToRoleMapper'&gt;
+    &lt;constructor-arg index=&quot;0&quot;&gt;
+      &lt;map&gt;
+        &lt;entry key=&quot;/**/*&quot; value=&quot;IS_AUTHENTICATED_ANONYMOUSLY&quot; /&gt;
+      &lt;/map&gt;
+    &lt;/constructor-arg&gt;
+  &lt;/bean&gt;
+&lt;/property&gt;</pre></div><p>This is saying that to access all urls in the module you do not need to be authenticated (the IS_AUTHENTICATED_ANONYMOUSLY role).</p><p>Restart jetty and access the application. You will see the hello menu entry without the need to login.</p></div>
+      </div>
+    </div>
+
+
+        </section>
+    </div>
   </body>
 </html>
